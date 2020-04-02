@@ -30,5 +30,6 @@ dependencies {
     //noinspection GradleCompatible
     implementation 'androidx.coordinatorlayout:coordinatorlayout:1.1.0-beta01'
     implementation 'com.google.android.material:material:1.0.0'
+    testImplementation 'org.robolectric:robolectric:4.3.1'
 
 }

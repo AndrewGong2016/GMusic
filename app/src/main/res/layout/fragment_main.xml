@@ -11,7 +11,7 @@
 
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
-
+<!--        在此Fragment中定义一个Toolbar 替代原有的bar：AppCompatActivity.setSupportActionBar-->
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar"
             app:navigationIcon="@drawable/ic_menu"
@@ -21,11 +21,11 @@
             android:layout_height="?attr/actionBarSize"
             app:layout_scrollFlags="scroll|enterAlways" />
 
-<!--        <com.google.android.material.tabs.TabLayout-->
-<!--            android:id="@+id/tabs"-->
-<!--            android:layout_width="match_parent"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:tag="tab_indicator_accent_color,bg_primary_color" />-->
+        <com.google.android.material.tabs.TabLayout
+            android:id="@+id/tabs"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:tag="tab_indicator_accent_color,bg_primary_color" />
 
     </com.google.android.material.appbar.AppBarLayout>
 

@@ -5,66 +5,31 @@
     <group
         android:id="@+id/group1"
         android:checkableBehavior="single">
-        <item
-            android:id="@+id/nav_library"
-
+        <item android:id="@+id/nav_library"
             android:title="library" />
-        <item
-            android:id="@+id/nav_playlists"
-
+        <item android:id="@+id/nav_playlists"
             android:title="playlists" />
-        <item
-            android:id="@+id/nav_folders"
-
+        <item android:id="@+id/nav_folders"
             android:title="folders" />
-        <item
-            android:id="@+id/nav_queue"
-
+        <item android:id="@+id/nav_queue"
             android:title="playing_queue" />
-        <item
-            android:id="@+id/nav_nowplaying"
+        <item android:id="@+id/nav_nowplaying"
             android:checkable="false"
             android:title="now_playing" />
-
     </group>
 
     <group
         android:id="@+id/group2"
         android:checkableBehavior="none">
-        <item
-
-            android:id="@+id/nav_settings"
+        <item android:id="@+id/nav_settings"
             android:title="settings" />
-
-        <item
-
-            android:id="@+id/nav_about"
+        <item android:id="@+id/nav_about"
             android:title="about" />
-
-        <item
-            android:id="@+id/nav_donate"
+        <item android:id="@+id/nav_donate"
             android:title="Support development" />
-
-        <item
-            android:title="A" />
-        <item
-            android:title="B" />
-        <item
-            android:title="C" />
-        <item
-            android:title="D" />
-        <item
-            android:title="E" />
-        <item
-            android:title="F" />
-        <item
-            android:title="G" />
-        <item
-            android:title="H" />
-        <item
-            android:title="I" />
-        <item
-            android:title="J" />
+        <item android:title="A" />
+        <item android:title="B" />
+        <item android:title="C" />
     </group>
 
 </menu>

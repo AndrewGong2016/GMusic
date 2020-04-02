@@ -11,18 +11,30 @@
         <androidx.core.widget.NestedScrollView
             android:layout_width="match_parent"
             android:layout_height="match_parent">
-            <TextView
-                android:id="@+id/tv_content_0"
-                android:layout_margin="16dp"
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recycler_view"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:lineSpacingMultiplier="2"
-                android:text="@string/textContent" />
+                android:layout_height="wrap_content">
+
+            </androidx.recyclerview.widget.RecyclerView>
         </androidx.core.widget.NestedScrollView>
 
     </LinearLayout>
+    <LinearLayout
+        android:orientation="vertical"
+        android:id="@+id/not_found_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
 
+        <TextView
+            android:text="No Song is Found"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
 
+        </TextView>
+
+    </LinearLayout>
 
 
 </LinearLayout>
