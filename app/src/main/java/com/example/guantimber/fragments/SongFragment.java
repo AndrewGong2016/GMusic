@@ -14,6 +14,8 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
 import com.example.guantimber.R;
 import com.example.guantimber.data.SongTrack;
 import com.example.guantimber.dataloaders.TrackLoader;
@@ -68,8 +70,17 @@ public class SongFragment extends Fragment {
         @Override
         public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
             //Recycle view 将Adapter 数据绑定给 到ViewHolder 时将回调该方法，用户可以对ViewHolder中的views进行设定
-            holder.trackName.setText(songTracks.get(position).getTitle());
-            holder.artistName.setText(songTracks.get(position).getArtist());
+            SongTrack songTrack = songTracks.get(position);
+            holder.trackName.setText(songTrack.getTitle());
+            holder.artistName.setText(songTrack.getArtist());
+
+            RequestOptions options = new RequestOptions()
+                    .placeholder(R.drawable.ic_empty_music2)
+                    .error(R.drawable.ic_empty_music2);
+            Glide.with(getContext())
+                    .load(TrackLoader.getAlbumArtUri(songTrack.getId()))
+                    .apply(options)
+                    .into(holder.artWrok);
         }
 
         @Override
@@ -86,6 +97,7 @@ public class SongFragment extends Fragment {
                 super(view);
                 trackName = view.findViewById(R.id.track_name);
                 artistName = view.findViewById(R.id.artist_name);
+                artWrok = view.findViewById(R.id.albumArt);
             }
         }
 

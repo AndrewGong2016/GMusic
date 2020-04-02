@@ -32,4 +32,8 @@ dependencies {
     implementation 'com.google.android.material:material:1.0.0'
     testImplementation 'org.robolectric:robolectric:4.3.1'
 
+    //use glide to load album art image
+    implementation 'com.github.bumptech.glide:glide:4.11.0'
+
+
 }

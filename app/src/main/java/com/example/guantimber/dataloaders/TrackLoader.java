@@ -69,5 +69,10 @@ public class TrackLoader {
         Cursor cursor = context.getContentResolver().query(MEDIA_URI,COLUMNS,builder.toString(),null,null);
         return cursor;
     }
+
+    public static Uri getAlbumArtUri(long id){
+        Uri uri= Uri.withAppendedPath(MEDIA_URI,id + "/albumart");
+        return uri;
+    }
 }
 
