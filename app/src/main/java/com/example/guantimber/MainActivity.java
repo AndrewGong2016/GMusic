@@ -6,6 +6,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
+import android.Manifest;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
@@ -23,9 +25,23 @@ public class MainActivity extends AppCompatActivity {
     String TAG = "guantbb";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
+
         Log.d(TAG, "onCreate: ");
         super.onCreate(savedInstanceState);
+
+
+
+        if (checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED){
+            Log.d(TAG, "onCreate: permission granted");
+        } else {
+            requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},1);
+            return;
+        }
+
+
         setContentView(R.layout.activity_main);
+
         if(Build.VERSION.SDK_INT >= 21){
             getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
                     |View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
@@ -43,6 +59,7 @@ public class MainActivity extends AppCompatActivity {
         
 
     }
+
 
 
     @Override

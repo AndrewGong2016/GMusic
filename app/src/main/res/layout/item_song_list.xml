@@ -1,40 +1,48 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:aapt="http://schemas.android.com/aapt"
     android:gravity="center_vertical"
+    android:orientation="horizontal"
     android:layout_width="match_parent"
     android:layout_height="72dp"
-    android:ignoreGravity="@+id/icon">
+    android:ignoreGravity="@+id/albumArt">
+
     <ImageView
-        android:id="@+id/icon"
+        android:id="@+id/albumArt"
+        android:src="@drawable/ic_empty_music2"
+        android:layout_marginLeft="20dp"
         android:layout_width="42dp"
         android:layout_height="42dp"
         android:layout_marginTop="15dp"
         android:layout_marginBottom="15dp"
         android:layout_centerVertical="true"/>
-    <ImageView
-        android:id="@+id/drm_icon" android:layout_width="22dp" android:layout_height="22dp"
-        android:layout_alignBottom="@+id/icon"/>
-    <TextView android:textAppearance="?android:attr/textAppearanceMedium"
-        android:textSize="16sp" android:textColor="@android:color/black"
-        android:ellipsize="end" android:id="@+id/line1"
-        android:layout_width="wrap_content" android:layout_height="wrap_content"
-        android:layout_marginTop="18dp" android:maxLines="1" android:maxEms="10"
-        android:layout_alignWithParentIfMissing="true"/>
-    <TextView android:textAppearance="?android:attr/textAppearanceSmall"
-        android:textSize="13sp"
-        android:textColor="@color/sub_title_color" android:ellipsize="end"
-        android:id="@+id/line2"
-        android:visibility="visible" android:layout_width="wrap_content"
-        android:layout_height="wrap_content" android:layout_marginBottom="15dp" android:maxLines="1"
-        android:scrollHorizontally="true"
-        android:layout_below="@+id/line1"
-        android:layout_alignWithParentIfMissing="true"/>
-    <ImageView android:id="@+id/show_options"
-        android:clickable="true"
-        android:layout_width="42dp" android:layout_height="42dp"
-        android:src="@drawable/ic_menu_detail_track"
-        android:layout_centerVertical="true"/>
-</RelativeLayout>
+
+    <LinearLayout
+        android:id="@+id/info_container"
+        android:layout_marginLeft="10dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/track_name"
+            android:text="track_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+        </TextView>
+
+        <TextView
+            android:id="@+id/artist_name"
+            android:text="artist name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+        </TextView>
+
+    </LinearLayout>
+
+
+</LinearLayout>
