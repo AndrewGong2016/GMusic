@@ -11,15 +11,29 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentPagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 
 import com.example.guantimber.R;
 import com.google.android.material.tabs.TabLayout;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class MainFragment extends Fragment {
 
     String TAG = "guantbb";
+
+    ArrayList<Fragment> fragments = new ArrayList<>();
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        fragments.add(new SongFragment());
+        fragments.add(new AlbumFragment());
+    }
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -36,23 +50,10 @@ public class MainFragment extends Fragment {
 //        actionBar.setDisplayShowHomeEnabled(true);
 
         ViewPager viewPager = rootView.findViewById(R.id.viewpager);
-        FragmentPagerAdapter adapter = new FragmentPagerAdapter(getChildFragmentManager()) {
+        MusicFragmentAdaper adapter = new MusicFragmentAdaper(getChildFragmentManager());
+        adapter.addFragment(new SongFragment(),"Songs");
+        adapter.addFragment(new AlbumFragment(),"Albums");
 
-            @Override
-            public int getCount() {
-                return 2;
-            }
-            @Override
-            public Fragment getItem(int position) {
-                return new SongFragment();
-            }
-
-            @Nullable
-            @Override
-            public CharSequence getPageTitle(int position) {
-                return "Guan";
-            }
-        };
         viewPager.setAdapter(adapter);
 
         TabLayout tabLayout = (TabLayout) rootView.findViewById(R.id.tabs);
@@ -65,5 +66,37 @@ public class MainFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         Log.d(TAG, "onViewCreated: ");
         super.onViewCreated(view, savedInstanceState);
+    }
+
+
+    class MusicFragmentAdaper extends FragmentPagerAdapter{
+        private final List<Fragment> mFragments = new ArrayList<>();
+        private final List<String> mFragmentTitles = new ArrayList<>();
+
+        public MusicFragmentAdaper(@NonNull FragmentManager fm) {
+            super(fm);
+        }
+
+        public void addFragment(Fragment fragment,String title){
+            mFragments.add(fragment);
+            mFragmentTitles.add(title);
+        }
+
+        @Nullable
+        @Override
+        public CharSequence getPageTitle(int position) {
+            return mFragmentTitles.get(position);
+        }
+
+        @NonNull
+        @Override
+        public Fragment getItem(int position) {
+            return mFragments.get(position);
+        }
+
+        @Override
+        public int getCount() {
+            return mFragments.size();
+        }
     }
 }

@@ -28,8 +28,8 @@
         android:layout_height="match_parent">
 
         <TextView
-            android:text="No Song is Found"
-            android:layout_gravity="center"
+            android:text="No Album is Found"
+            android:layout_gravity="center_vertical"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 

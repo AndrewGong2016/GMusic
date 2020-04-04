@@ -83,8 +83,6 @@ public class MusicPlaybackService extends Service {
         }
     }
 
-
-
     private final class ServiceStub extends IMusicPlaybackService.Stub {
 
         private final WeakReference<MusicPlaybackService> mService;
@@ -313,6 +311,9 @@ public class MusicPlaybackService extends Service {
 
         private MediaPlayer mNextMediaPlayer;
 
+        /**
+         * deviler media file event(Error happen in MediaPlayer or completed playing ) with Handler
+         */
         private Handler mHandler;
 
         private boolean mIsInitialized = false;
@@ -323,9 +324,7 @@ public class MusicPlaybackService extends Service {
         public MultiPlayer(final MusicPlaybackService service) {
             mService = new WeakReference<MusicPlaybackService>(service);
             mCurrentMediaPlayer.setWakeMode(mService.get(), PowerManager.PARTIAL_WAKE_LOCK);
-
         }
-
 
         public void setDataSource(final String path) {
             try {
@@ -339,6 +338,7 @@ public class MusicPlaybackService extends Service {
         }
 
 
+        // Set data srouce for a MediaPlayer, current player or next player.
         private boolean setDataSourceImpl(final MediaPlayer player, final String path) {
             try {
                 player.reset();

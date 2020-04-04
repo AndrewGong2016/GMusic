@@ -2,6 +2,7 @@ package com.example.guantimber.fragments;
 
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,6 +26,8 @@ import java.util.List;
 public class SongFragment extends Fragment {
     private RecyclerView mRecycleView;
     private SongAdapter mSongAdapter;
+
+    private static String TAG = "SongFragment";
 
     @Nullable
     @Override
@@ -85,7 +88,7 @@ public class SongFragment extends Fragment {
 
         @Override
         public int getItemCount() {
-            return songTracks.size();
+            return songTracks!=null?songTracks.size():0;
         }
 
         class ViewHolder extends RecyclerView.ViewHolder{
@@ -98,6 +101,14 @@ public class SongFragment extends Fragment {
                 trackName = view.findViewById(R.id.track_name);
                 artistName = view.findViewById(R.id.artist_name);
                 artWrok = view.findViewById(R.id.albumArt);
+
+                view.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        Log.d(TAG, "onClick: " + getAdapterPosition());
+                        getAdapterPosition();
+                    }
+                });
             }
         }
 
