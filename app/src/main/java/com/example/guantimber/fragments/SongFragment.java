@@ -58,10 +58,10 @@ public class SongFragment extends Fragment {
     }
 
     class SongAdapter extends RecyclerView.Adapter<SongAdapter.ViewHolder>{
-
         private List<SongTrack> songTracks;
+
         public SongAdapter(List<SongTrack> songTracks){
-            this.songTracks= songTracks;
+            this.songTracks = songTracks;
         }
         @NonNull
         @Override
@@ -88,9 +88,16 @@ public class SongFragment extends Fragment {
 
         @Override
         public int getItemCount() {
-            return songTracks!=null?songTracks.size():0;
+            return songTracks != null ? songTracks.size():0;
         }
 
+        public long[] getSongIDs(){
+            long[] ret = new long[getItemCount()];
+            for (int i = 0; i < getItemCount(); i++) {
+                ret[i] = songTracks.get(i).getId();
+            }
+            return ret;
+        }
         class ViewHolder extends RecyclerView.ViewHolder{
             ImageView artWrok;
             TextView trackName;
@@ -107,10 +114,27 @@ public class SongFragment extends Fragment {
                     public void onClick(View view) {
                         Log.d(TAG, "onClick: " + getAdapterPosition());
                         getAdapterPosition();
+                        /**
+                         * click event should add all songs here to playlist and play the click one
+                         * 1 start the PlayerService.
+                         *  Difficulty : how can we start/bind a service from a fragment? or is it approprite ?
+                         *  Resolution : Servid-bind work can be done in a Activity
+                         *
+                         * 2 pass the data set and the playing track id
+                         */
+                        ((SongClickCallback)getActivity()).onSongClick(view,getSongIDs(),getAdapterPosition());
+
+                        Log.d(TAG, "onClick: Adapter position = "+ getAdapterPosition());
+                        Log.d(TAG, "onClick: Song id in adapter = "+songTracks.get(getAdapterPosition()).getId());
+                        Log.d(TAG, "onClick: Song title is  "+ songTracks.get(getAdapterPosition()).getTitle());
                     }
                 });
             }
         }
 
+    }
+
+    public interface SongClickCallback{
+        void onSongClick(View view,long[] list,int position);
     }
 }

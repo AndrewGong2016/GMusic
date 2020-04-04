@@ -6,18 +6,22 @@ import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.PowerManager;
 import android.os.RemoteException;
+import android.provider.MediaStore;
 import android.util.Log;
 
 import androidx.annotation.Nullable;
 
 import com.example.guantimber.IMusicPlaybackService;
+import com.example.guantimber.data.SongTrack;
 
 import java.io.IOException;
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
 
 public class MusicPlaybackService extends Service {
     //TAG for logging
@@ -36,6 +40,25 @@ public class MusicPlaybackService extends Service {
 
     private final IBinder mBinder = new ServiceStub(this);
 
+    //播放歌曲相关的记录信息
+    private int mPlayPos = -1;
+    private ArrayList<Long> mPlaylist = new ArrayList<Long>(100);
+
+    private MultiPlayer mPlayer;
+    private HandlerThread mHandlerThread;
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+
+        mHandlerThread = new HandlerThread("MusicPlayerHander",
+                android.os.Process.THREAD_PRIORITY_BACKGROUND);
+
+        mPlayer = new MultiPlayer(this);
+        mPlayer.setHandler(new Handler());
+
+    }
+
     @Override
     public int onStartCommand(final Intent intent, final int flags, final int startId) {
 
@@ -43,6 +66,7 @@ public class MusicPlaybackService extends Service {
 
         if (intent != null) {
             final String action = intent.getAction();
+            Log.d(TAG, "onStartCommand: action = " + action);
 
             if (SHUTDOWN.equals(action)) {
                 mShutdownScheduled = false;
@@ -99,6 +123,7 @@ public class MusicPlaybackService extends Service {
         @Override
         public void open(long[] list, int position, long sourceId, int sourceType) throws RemoteException {
 
+            mService.get().open(list,position,sourceId,sourceType);
         }
 
         @Override
@@ -113,7 +138,7 @@ public class MusicPlaybackService extends Service {
 
         @Override
         public void play() throws RemoteException {
-
+            mService.get().play();
         }
 
         @Override
@@ -300,6 +325,38 @@ public class MusicPlaybackService extends Service {
         public int getAudioSessionId() throws RemoteException {
             return 0;
         }
+    }
+
+    private void play() {
+        mPlayer.start();
+    }
+
+    private void open(long[] list, int position, long sourceId, int sourceType) {
+        synchronized (this){
+
+            mPlayPos = position;
+            mPlaylist.clear();
+            for(int i= 0;i<list.length;i++){
+                mPlaylist.add(list[i]);
+            }
+            openCurrentAndNext();
+        }
+    }
+
+    private void openCurrentAndNext() {
+        synchronized (this){
+            if (mPlaylist.size() == 0) return;
+
+            Long id = mPlaylist.get(mPlayPos);
+            String filePath = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI + "/" + id;
+
+            mPlayer.setDataSource(filePath);
+            if (mPlayer.isInitialized()){
+                return;
+            }
+
+        }
+
     }
 
     private static final class MultiPlayer implements MediaPlayer.OnErrorListener,

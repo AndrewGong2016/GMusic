@@ -18,18 +18,19 @@ import android.view.View;
 import android.widget.Toast;
 
 import com.example.guantimber.fragments.MainFragment;
+import com.example.guantimber.fragments.SongFragment;
 import com.google.android.material.navigation.NavigationView;
 
-public class MainActivity extends AppCompatActivity {
+import java.util.Arrays;
+
+public class MainActivity extends AppCompatActivity implements SongFragment.SongClickCallback {
 
     String TAG = "guantbb";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
-
         Log.d(TAG, "onCreate: ");
         super.onCreate(savedInstanceState);
-
 
 
         if (checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED){
@@ -38,8 +39,6 @@ public class MainActivity extends AppCompatActivity {
             requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},1);
             return;
         }
-
-
         setContentView(R.layout.activity_main);
 
         if(Build.VERSION.SDK_INT >= 21){
@@ -56,6 +55,9 @@ public class MainActivity extends AppCompatActivity {
 
         NavigationView navigationView = (NavigationView)findViewById(R.id.nav_view);
         navigationView.inflateHeaderView(R.layout.nav_view);
+
+
+
         
 
     }
@@ -103,5 +105,13 @@ public class MainActivity extends AppCompatActivity {
 
         };
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onSongClick(View view, long[] list, int position) {
+
+        Log.d(TAG, "onSongClick: " +" position = " + position + " in song list"+Arrays.toString(list));
+
+        Log.d(TAG, "onSongClick: song id = "+ list[position]);
     }
 }
