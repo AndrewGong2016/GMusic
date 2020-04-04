@@ -116,17 +116,18 @@ public class SongFragment extends Fragment {
                         getAdapterPosition();
                         /**
                          * click event should add all songs here to playlist and play the click one
-                         * 1 start the PlayerService.
+                         * 1 what to do when a song is cliked ？
+                         *  Answer is ：call the PlayerService and play the song cliked.
                          *  Difficulty : how can we start/bind a service from a fragment? or is it approprite ?
-                         *  Resolution : Servid-bind work can be done in a Activity
+                         *  Resolution : Servid-bind work can be done in a Activity . let define a SongClickCallback
+                         *  and the activity should implement it.
                          *
                          * 2 pass the data set and the playing track id
                          */
                         ((SongClickCallback)getActivity()).onSongClick(view,getSongIDs(),getAdapterPosition());
-
                         Log.d(TAG, "onClick: Adapter position = "+ getAdapterPosition());
-                        Log.d(TAG, "onClick: Song id in adapter = "+songTracks.get(getAdapterPosition()).getId());
-                        Log.d(TAG, "onClick: Song title is  "+ songTracks.get(getAdapterPosition()).getTitle());
+                        Log.d(TAG, "onClick: Song id in the position = "+songTracks.get(getAdapterPosition()).getId());
+                        Log.d(TAG, "onClick: Song title is : "+ songTracks.get(getAdapterPosition()).getTitle());
                     }
                 });
             }
