@@ -1,6 +1,7 @@
 package com.example.guantimber.service;
 
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
@@ -18,10 +19,12 @@ import androidx.annotation.Nullable;
 
 import com.example.guantimber.IMusicPlaybackService;
 import com.example.guantimber.data.SongTrack;
+import com.example.guantimber.dataloaders.TrackLoader;
 
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class MusicPlaybackService extends Service {
     //TAG for logging
@@ -43,6 +46,7 @@ public class MusicPlaybackService extends Service {
     //播放歌曲相关的记录信息
     private int mPlayPos = -1;
     private ArrayList<Long> mPlaylist = new ArrayList<Long>(100);
+    private SongTrack mCurrentSong;
 
     private MultiPlayer mPlayer;
     private HandlerThread mHandlerThread;
@@ -57,8 +61,20 @@ public class MusicPlaybackService extends Service {
         mPlayer = new MultiPlayer(this);
         mPlayer.setHandler(new Handler());
 
+        // get Wake Lock to keep servie running while device is in sleeping mode
+        final PowerManager powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
+        mWakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,getClass().getName());
+        mWakeLock.setReferenceCounted(false);
     }
 
+
+    /**
+     * What && Why should we do it here
+     * @param intent
+     * @param flags
+     * @param startId
+     * @return
+     */
     @Override
     public int onStartCommand(final Intent intent, final int flags, final int startId) {
 
@@ -248,7 +264,7 @@ public class MusicPlaybackService extends Service {
 
         @Override
         public long getAudioId() throws RemoteException {
-            return 0;
+            return mService.get().getAudioId();
         }
 
         @Override
@@ -273,12 +289,12 @@ public class MusicPlaybackService extends Service {
 
         @Override
         public String getArtistName() throws RemoteException {
-            return null;
+            return mService.get().getArtistName();
         }
 
         @Override
         public String getTrackName() throws RemoteException {
-            return null;
+            return mService.get().getTrackName();
         }
 
         @Override
@@ -333,12 +349,16 @@ public class MusicPlaybackService extends Service {
 
     private void open(long[] list, int position, long sourceId, int sourceType) {
         synchronized (this){
-
+            Log.d(TAG, "open: list (size = "+list.length+")"+ Arrays.toString(list)+" , position = "+ position);
+            //update current position in playlist
             mPlayPos = position;
+            //clean playlist
             mPlaylist.clear();
             for(int i= 0;i<list.length;i++){
                 mPlaylist.add(list[i]);
             }
+
+            //open current file and be ready to play
             openCurrentAndNext();
         }
     }
@@ -350,6 +370,10 @@ public class MusicPlaybackService extends Service {
             Long id = mPlaylist.get(mPlayPos);
             String filePath = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI + "/" + id;
 
+            //update nowplaying track with the id
+            mCurrentSong = TrackLoader.getTrackWithId(this,id);
+
+            Log.d(TAG, "openCurrentAndNext: current song is : "+ mCurrentSong.getTitle());
             mPlayer.setDataSource(filePath);
             if (mPlayer.isInitialized()){
                 return;
@@ -396,6 +420,7 @@ public class MusicPlaybackService extends Service {
 
 
         // Set data srouce for a MediaPlayer, current player or next player.
+        //we have reset the player before setData on it ,so this will be safe to memory leak
         private boolean setDataSourceImpl(final MediaPlayer player, final String path) {
             try {
                 player.reset();
@@ -561,10 +586,14 @@ public class MusicPlaybackService extends Service {
     }
 
     private String getTrackName() {
-        return "";
+        return mCurrentSong.getTitle();
+    }
+
+    private String getArtistName(){
+        return mCurrentSong.getArtist();
     }
 
     private long getAudioId() {
-        return -1;
+        return mCurrentSong.getId();
     }
 }

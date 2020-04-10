@@ -30,6 +30,7 @@
             android:layout_height="wrap_content"
             android:layout_marginLeft="10dp"
             android:layout_marginTop="15dp"
+            android:layout_marginBottom="15dp"
             android:layout_toRightOf="@+id/albumArt"
             android:orientation="vertical">
 
@@ -37,6 +38,11 @@
                 android:id="@+id/track_name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:marqueeRepeatLimit="marquee_forever"
+                android:singleLine="true"
+                android:ellipsize="marquee"
+                android:focusable="true"
+                android:focusableInTouchMode="true"
                 android:text="track_name"
                 android:textSize="15sp">
 

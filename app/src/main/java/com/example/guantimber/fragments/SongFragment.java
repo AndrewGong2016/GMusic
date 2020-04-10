@@ -75,6 +75,7 @@ public class SongFragment extends Fragment {
             //Recycle view 将Adapter 数据绑定给 到ViewHolder 时将回调该方法，用户可以对ViewHolder中的views进行设定
             SongTrack songTrack = songTracks.get(position);
             holder.trackName.setText(songTrack.getTitle());
+            holder.trackName.setSelected(true);
             holder.artistName.setText(songTrack.getArtist());
 
             RequestOptions options = new RequestOptions()

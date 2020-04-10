@@ -74,5 +74,40 @@ public class TrackLoader {
         Uri uri= Uri.withAppendedPath(MEDIA_URI,id + "/albumart");
         return uri;
     }
+
+    public static SongTrack getTrackWithId(Context context, Long id){
+        StringBuilder builder = new StringBuilder();
+        builder.append("title !=''");
+        builder.append(" AND "+IS_MUSIC+"=1");
+        builder.append(" AND "+MediaStore.Audio.AudioColumns._ID+"="+id);
+        Cursor cursor = context.getContentResolver().query(MEDIA_URI,COLUMNS,builder.toString(),null,null);
+
+        if (cursor!= null && cursor.moveToNext()){
+            SongTrack song = new SongTrack();
+            Long cursorId = cursor.getLong(cursor.getColumnIndex(MediaStore.Audio.AudioColumns._ID));
+            String data = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.AudioColumns.DATA));
+            String title = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.AudioColumns.TITLE));
+            String artist = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.AudioColumns.ARTIST));
+            Long artist_id = cursor.getLong(cursor.getColumnIndex(MediaStore.Audio.AudioColumns.ARTIST_ID));
+            Long album_id = cursor.getLong(cursor.getColumnIndex(MediaStore.Audio.AudioColumns.ALBUM_ID));
+            song.setId(cursorId);
+            song.setData(data);
+            song.setTitle(title);
+            song.setArtist(artist);
+            song.setArtist_id(artist_id);
+            song.setAlbum_id(album_id);
+
+            Log.d(TAG, "getTrackWithId: id = "+id+",and title is :"+ title);
+
+            return song;
+
+        } else {
+            Log.d(TAG, "getTrackWithId: id = "+id+",and Not found!");
+            return null;
+        }
+
+
+
+    }
 }
 
