@@ -15,6 +15,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
 import android.widget.Toast;
 
 import com.example.guantimber.fragments.MainFragment;
@@ -32,6 +33,8 @@ public class MainActivity extends AppCompatActivity implements SongFragment.Song
         Log.d(TAG, "onCreate: ");
         super.onCreate(savedInstanceState);
 
+        supportRequestWindowFeature(Window.FEATURE_NO_TITLE);
+        setTheme(R.style.MainFaceTheme);
 
         if (checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED){
             Log.d(TAG, "onCreate: permission granted");
@@ -41,11 +44,6 @@ public class MainActivity extends AppCompatActivity implements SongFragment.Song
         }
         setContentView(R.layout.activity_main);
 
-        if(Build.VERSION.SDK_INT >= 21){
-            getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                    |View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
-            getWindow().setStatusBarColor(Color.TRANSPARENT);
-        }
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction transaction = fragmentManager.beginTransaction();
 

@@ -1,20 +1,23 @@
 <resources>
 
     <!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
-        <!-- Customize your theme here. -->
-        <item name="colorPrimary">@color/colorPrimary</item>
-        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
-        <item name="colorAccent">@color/colorAccent</item>
+
+
+    <style name="CustomToolbar" parent="Widget.AppCompat.Toolbar">
+        <item name="contentInsetStart">0dp</item> <!-- 设置该属性边距为0dp -->
     </style>
 
-
     <style name="AppTheme.Full.Light" parent="Theme.AppCompat.Light.NoActionBar">
-<!--        <item name="colorPrimary">@color/colorPrimary</item>-->
-        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
-<!--        <item name="colorAccent">@color/colorAccent</item>-->
-<!--        <item name="android:windowBackground">@color/window_background</item>-->
 
+    </style>
+
+    <style name="MainFaceTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>"
+        
+        <item name="android:statusBarColor">@color/theme1_statusbar_color</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:colorPrimary">@color/theme1_color</item>
     </style>
 
 </resources>
