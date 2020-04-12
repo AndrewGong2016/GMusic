@@ -53,11 +53,29 @@ public class MainFragment extends Fragment {
         MusicFragmentAdaper adapter = new MusicFragmentAdaper(getChildFragmentManager());
         adapter.addFragment(new SongFragment(),"Songs");
         adapter.addFragment(new AlbumFragment(),"Albums");
+        adapter.addFragment(new ArtistsFragment(),"Artists");
 
         viewPager.setAdapter(adapter);
 
         TabLayout tabLayout = (TabLayout) rootView.findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(viewPager);
+        tabLayout.setOnTabSelectedListener(new TabLayout.BaseOnTabSelectedListener() {
+            @Override
+            public void onTabSelected(TabLayout.Tab tab) {
+                Log.d(TAG, "onTabSelected: "+ tab.getText());
+
+            }
+
+            @Override
+            public void onTabUnselected(TabLayout.Tab tab) {
+
+            }
+
+            @Override
+            public void onTabReselected(TabLayout.Tab tab) {
+
+            }
+        });
 
         return rootView;
     }

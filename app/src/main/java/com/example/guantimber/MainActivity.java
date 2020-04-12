@@ -55,6 +55,7 @@ public class MainActivity extends AppCompatActivity implements SongFragment.Song
         }
         setContentView(R.layout.activity_main);
 
+
         //add fragment into the activity
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction transaction = fragmentManager.beginTransaction();

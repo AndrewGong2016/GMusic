@@ -14,6 +14,7 @@
 <!--        在此Fragment中定义一个Toolbar 替代原有的bar：AppCompatActivity.setSupportActionBar-->
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar"
+            android:background="@color/theme1_statusbar_color"
             app:navigationIcon="@drawable/ic_menu"
             app:title="@string/app_name"
             android:textAlignment="center"
@@ -23,10 +24,12 @@
 
         <com.google.android.material.tabs.TabLayout
             android:id="@+id/tabs"
-
+            android:background="@color/theme1_statusbar_color"
             app:tabTextAppearance="@android:style/TextAppearance.Widget.Button"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            app:tabSelectedTextColor="@color/colorAccent"
+            app:tabIndicatorColor="@android:color/transparent"
             android:tag="tab_indicator_accent_color,bg_primary_color" />
 
     </com.google.android.material.appbar.AppBarLayout>
