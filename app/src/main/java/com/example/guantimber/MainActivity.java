@@ -47,10 +47,11 @@ public class MainActivity extends AppCompatActivity implements SongFragment.Song
         supportRequestWindowFeature(Window.FEATURE_NO_TITLE);
         setTheme(R.style.MainFaceTheme);
 
-        if (checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED){
+
+        if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED){
             Log.d(TAG, "onCreate: permission granted");
         } else {
-            requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},1);
+            requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},1);
             return;
         }
         setContentView(R.layout.activity_main);

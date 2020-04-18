@@ -78,6 +78,13 @@ public class NowPlayingActivity extends AppCompatActivity {
         unbindService(binder);
     }
 
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        unbindService();
+    }
+
     class ServiceBinder implements ServiceConnection {
 
         @Override

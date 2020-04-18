@@ -54,6 +54,7 @@ public class MainFragment extends Fragment {
         adapter.addFragment(new SongFragment(),"Songs");
         adapter.addFragment(new AlbumFragment(),"Albums");
         adapter.addFragment(new ArtistsFragment(),"Artists");
+        adapter.addFragment(new PlaylistFragment(),"Playlists");
 
         viewPager.setAdapter(adapter);
 

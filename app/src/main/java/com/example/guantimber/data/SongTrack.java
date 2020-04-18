@@ -8,6 +8,15 @@ public class SongTrack {
     String artist;
     Long artist_id ;
     Long album_id ;
+    String album;
+
+    public String getAlbum() {
+        return album;
+    }
+
+    public void setAlbum(String album) {
+        this.album = album;
+    }
 
     public String getTitle() {
         return title;

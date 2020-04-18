@@ -25,6 +25,7 @@ public class TrackLoader {
             MediaStore.Audio.AudioColumns.ARTIST,       // 4 : artist of a track
             MediaStore.Audio.AudioColumns.ARTIST_ID,    // 5 : artist id in media store
             MediaStore.Audio.AudioColumns.ALBUM_ID,     // 6 : album of a track
+            MediaStore.Audio.AudioColumns.ALBUM,        // 7 : album name
             MediaStore.Audio.AudioColumns.MIME_TYPE
     };
     public static String IS_MUSIC = MediaStore.Audio.AudioColumns.IS_MUSIC;
@@ -41,12 +42,15 @@ public class TrackLoader {
                 String artist = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.AudioColumns.ARTIST));
                 Long artist_id = cursor.getLong(cursor.getColumnIndex(MediaStore.Audio.AudioColumns.ARTIST_ID));
                 Long album_id = cursor.getLong(cursor.getColumnIndex(MediaStore.Audio.AudioColumns.ALBUM_ID));
+                String album = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.ALBUM));
+
                 song.setId(id);
                 song.setData(data);
                 song.setTitle(title);
                 song.setArtist(artist);
                 song.setArtist_id(artist_id);
                 song.setAlbum_id(album_id);
+                song.setAlbum(album);
                 songTracks.add(song);
             }while (cursor.moveToNext());
 

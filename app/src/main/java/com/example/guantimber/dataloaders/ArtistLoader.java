@@ -6,7 +6,6 @@ import android.net.Uri;
 import android.provider.MediaStore;
 import android.util.Log;
 
-import com.example.guantimber.data.AlbumData;
 import com.example.guantimber.data.ArtistData;
 
 import java.util.ArrayList;
@@ -14,7 +13,7 @@ import java.util.ArrayList;
 public class ArtistLoader {
 
     public static Uri ARTIST_URI = MediaStore.Audio.Artists.EXTERNAL_CONTENT_URI;
-    public static String TAG = "AlbumLoader";
+    public static String TAG = "ArtistLoader";
 
     public static String[] COLUMNS = new String[]{
             MediaStore.Audio.ArtistColumns.ARTIST,
@@ -47,6 +46,9 @@ public class ArtistLoader {
                 builder.append("," + albumData.getArtist());
             }
             Log.d(TAG, "Artists : " + builder.toString());
+
+            cursor.close();
+
             return artists;
         }
         Log.d(TAG, context.getPackageName()+" are tring to get Artists from "+ ARTIST_URI.toString() + " and nothing returned");

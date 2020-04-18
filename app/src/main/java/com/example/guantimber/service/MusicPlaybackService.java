@@ -1,11 +1,17 @@
 package com.example.guantimber.service;
 
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
@@ -13,12 +19,17 @@ import android.os.Message;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.provider.MediaStore;
+import android.text.TextUtils;
 import android.util.Log;
 
 import androidx.annotation.Nullable;
+import androidx.core.app.NotificationCompat;
+import androidx.palette.graphics.Palette;
 
 import com.example.guantimber.IMusicPlaybackService;
+import com.example.guantimber.R;
 import com.example.guantimber.data.SongTrack;
+import com.example.guantimber.dataloaders.ArtworkLoader;
 import com.example.guantimber.dataloaders.TrackLoader;
 
 import java.io.IOException;
@@ -37,6 +48,7 @@ public class MusicPlaybackService extends Service {
     private static final int FOCUSCHANGE = 5;
     private static final int FADEDOWN = 6;
     private static final int FADEUP = 7;
+    private static final String CHANNEL_ID ="guan_timber_channel_01" ;
 
     private int mServiceStartId = -1;
     private boolean mShutdownScheduled;
@@ -54,6 +66,7 @@ public class MusicPlaybackService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
+        createNotificationChannel();
 
         mHandlerThread = new HandlerThread("MusicPlayerHander",
                 android.os.Process.THREAD_PRIORITY_BACKGROUND);
@@ -112,6 +125,54 @@ public class MusicPlaybackService extends Service {
         return mBinder;
     }
 
+
+    private void updateNotification(){
+        int notificationId = hashCode();
+
+        startForeground(notificationId,buildNotification());
+    }
+
+
+    private void createNotificationChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            CharSequence name = "G-Music";
+            int importance = NotificationManager.IMPORTANCE_LOW;
+            NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+            NotificationChannel mChannel = new NotificationChannel(CHANNEL_ID, name, importance);
+            mChannel.setShowBadge(false);
+            manager.createNotificationChannel(mChannel);
+        }
+    }
+
+    private Notification buildNotification() {
+        String artistName = getArtistName();
+        String albumName = getAlbumName();
+        Bitmap artwork = null;
+        String text = TextUtils.isEmpty(albumName)
+                ? artistName : artistName + " - " + albumName;
+
+
+        artwork = ArtworkLoader.loadImageSync(this,getAudioId());
+
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this,CHANNEL_ID)
+                .setSmallIcon(R.drawable.ic_notification)
+                .setLargeIcon(artwork)
+                .setContentTitle(getTrackName())
+                .setContentText(text)
+                .setShowWhen(false)
+                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC);
+
+
+        //style the notification
+        androidx.media.app.NotificationCompat.MediaStyle style = new androidx.media.app.NotificationCompat.MediaStyle();
+        style.setShowActionsInCompactView(0,1,2,3);
+//        builder.setStyle(style);
+
+        builder.setColor(Palette.from(artwork).generate().getVibrantColor(Color.parseColor("#403f4d")));
+        builder.setColorized(true);
+
+        return builder.build();
+    }
 
     private static final class TrackErrorInfo {
         public long mId;
@@ -345,6 +406,8 @@ public class MusicPlaybackService extends Service {
 
     private void play() {
         mPlayer.start();
+
+        updateNotification();
     }
 
     private void open(long[] list, int position, long sourceId, int sourceType) {
@@ -591,6 +654,10 @@ public class MusicPlaybackService extends Service {
 
     private String getArtistName(){
         return mCurrentSong.getArtist();
+    }
+
+    private String getAlbumName(){
+        return mCurrentSong.getAlbum();
     }
 
     private long getAudioId() {
