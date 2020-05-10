@@ -3,9 +3,12 @@ package com.example.guantimber.service;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.Service;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.media.AudioManager;
@@ -15,6 +18,7 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.Message;
 import android.os.PowerManager;
 import android.os.RemoteException;
@@ -22,6 +26,7 @@ import android.provider.MediaStore;
 import android.text.TextUtils;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 import androidx.palette.graphics.Palette;
@@ -39,6 +44,7 @@ import java.util.Arrays;
 
 public class MusicPlaybackService extends Service {
     //TAG for logging
+    public static final String EXIT_ACTION = "com.guantimber.exit";
     public static final String TAG = "MusicPlaybackService";
     private static final String SHUTDOWN = "com.naman14.timber.shutdown";
     private static final int TRACK_ENDED = 1;
@@ -48,7 +54,7 @@ public class MusicPlaybackService extends Service {
     private static final int FOCUSCHANGE = 5;
     private static final int FADEDOWN = 6;
     private static final int FADEUP = 7;
-    private static final String CHANNEL_ID ="guan_timber_channel_01" ;
+    private static final String CHANNEL_ID = "guan_timber_channel_01";
 
     private int mServiceStartId = -1;
     private boolean mShutdownScheduled;
@@ -63,6 +69,19 @@ public class MusicPlaybackService extends Service {
     private MultiPlayer mPlayer;
     private HandlerThread mHandlerThread;
 
+    private final BroadcastReceiver mIntentReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+
+            if (EXIT_ACTION.equals(intent.getAction())) {
+                stopForeground(true);
+                stopSelf();
+            }
+
+        }
+    };
+
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -70,19 +89,26 @@ public class MusicPlaybackService extends Service {
 
         mHandlerThread = new HandlerThread("MusicPlayerHander",
                 android.os.Process.THREAD_PRIORITY_BACKGROUND);
+        mHandlerThread.start();
 
         mPlayer = new MultiPlayer(this);
-        mPlayer.setHandler(new Handler());
+        mPlayer.setHandler(new MusicPlayerHandler(this,mHandlerThread.getLooper()));
 
         // get Wake Lock to keep servie running while device is in sleeping mode
         final PowerManager powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
-        mWakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,getClass().getName());
+        mWakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, getClass().getName());
         mWakeLock.setReferenceCounted(false);
+
+
+        final IntentFilter filter = new IntentFilter();
+        filter.addAction(EXIT_ACTION);
+        registerReceiver(mIntentReceiver, filter);
     }
 
 
     /**
      * What && Why should we do it here
+     *
      * @param intent
      * @param flags
      * @param startId
@@ -116,6 +142,16 @@ public class MusicPlaybackService extends Service {
     }
 
 
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        Log.d(TAG, "onDestroy: ");
+
+        mPlayer.release();
+
+        unregisterReceiver(mIntentReceiver);
+    }
+
 
     private PowerManager.WakeLock mWakeLock;
 
@@ -126,10 +162,10 @@ public class MusicPlaybackService extends Service {
     }
 
 
-    private void updateNotification(){
+    private void updateNotification() {
         int notificationId = hashCode();
 
-        startForeground(notificationId,buildNotification());
+        startForeground(notificationId, buildNotification());
     }
 
 
@@ -152,9 +188,9 @@ public class MusicPlaybackService extends Service {
                 ? artistName : artistName + " - " + albumName;
 
 
-        artwork = ArtworkLoader.loadImageSync(this,getAudioId());
+        artwork = ArtworkLoader.loadImageSync(this, getAudioId());
 
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(this,CHANNEL_ID)
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
                 .setSmallIcon(R.drawable.ic_notification)
                 .setLargeIcon(artwork)
                 .setContentTitle(getTrackName())
@@ -162,10 +198,15 @@ public class MusicPlaybackService extends Service {
                 .setShowWhen(false)
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC);
 
+        Intent intent = new Intent();
+        intent.setAction(EXIT_ACTION);
+        builder.addAction(new NotificationCompat.Action(R.drawable.ic_notification,
+                "Exit",
+                PendingIntent.getBroadcast(this, 1, intent, 0)));
 
         //style the notification
         androidx.media.app.NotificationCompat.MediaStyle style = new androidx.media.app.NotificationCompat.MediaStyle();
-        style.setShowActionsInCompactView(0,1,2,3);
+        style.setShowActionsInCompactView(0, 1, 2, 3);
 //        builder.setStyle(style);
 
         builder.setColor(Palette.from(artwork).generate().getVibrantColor(Color.parseColor("#403f4d")));
@@ -188,7 +229,7 @@ public class MusicPlaybackService extends Service {
 
         private final WeakReference<MusicPlaybackService> mService;
 
-        public ServiceStub(final MusicPlaybackService service){
+        public ServiceStub(final MusicPlaybackService service) {
             mService = new WeakReference<MusicPlaybackService>(service);
         }
 
@@ -200,7 +241,7 @@ public class MusicPlaybackService extends Service {
         @Override
         public void open(long[] list, int position, long sourceId, int sourceType) throws RemoteException {
 
-            mService.get().open(list,position,sourceId,sourceType);
+            mService.get().open(list, position, sourceId, sourceType);
         }
 
         @Override
@@ -411,13 +452,13 @@ public class MusicPlaybackService extends Service {
     }
 
     private void open(long[] list, int position, long sourceId, int sourceType) {
-        synchronized (this){
-            Log.d(TAG, "open: list (size = "+list.length+")"+ Arrays.toString(list)+" , position = "+ position);
+        synchronized (this) {
+            Log.d(TAG, "open: list (size = " + list.length + ")" + Arrays.toString(list) + " , position = " + position);
             //update current position in playlist
             mPlayPos = position;
             //clean playlist
             mPlaylist.clear();
-            for(int i= 0;i<list.length;i++){
+            for (int i = 0; i < list.length; i++) {
                 mPlaylist.add(list[i]);
             }
 
@@ -427,18 +468,18 @@ public class MusicPlaybackService extends Service {
     }
 
     private void openCurrentAndNext() {
-        synchronized (this){
+        synchronized (this) {
             if (mPlaylist.size() == 0) return;
 
             Long id = mPlaylist.get(mPlayPos);
             String filePath = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI + "/" + id;
 
             //update nowplaying track with the id
-            mCurrentSong = TrackLoader.getTrackWithId(this,id);
+            mCurrentSong = TrackLoader.getTrackWithId(this, id);
 
-            Log.d(TAG, "openCurrentAndNext: current song is : "+ mCurrentSong.getTitle());
+            Log.d(TAG, "openCurrentAndNext: current song is : " + mCurrentSong.getTitle());
             mPlayer.setDataSource(filePath);
-            if (mPlayer.isInitialized()){
+            if (mPlayer.isInitialized()) {
                 return;
             }
 
@@ -648,15 +689,40 @@ public class MusicPlaybackService extends Service {
         }
     }
 
+    private static final class MusicPlayerHandler extends Handler {
+
+        private final MusicPlaybackService mService;
+
+        public MusicPlayerHandler(final MusicPlaybackService service, final Looper looper) {
+            super(looper);
+            mService = service;
+        }
+
+        @Override
+        public void handleMessage(@NonNull Message msg) {
+            switch (msg.what) {
+                case TRACK_ENDED:
+
+                    mService.stopSelf();
+                    break;
+
+                default:
+                    break;
+
+
+            }
+        }
+    }
+
     private String getTrackName() {
         return mCurrentSong.getTitle();
     }
 
-    private String getArtistName(){
+    private String getArtistName() {
         return mCurrentSong.getArtist();
     }
 
-    private String getAlbumName(){
+    private String getAlbumName() {
         return mCurrentSong.getAlbum();
     }
 

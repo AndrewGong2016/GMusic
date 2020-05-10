@@ -35,14 +35,23 @@
     </com.google.android.material.appbar.AppBarLayout>
 
 
-    <androidx.core.widget.NestedScrollView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content">
-    </androidx.core.widget.NestedScrollView>
+<!--    <androidx.core.widget.NestedScrollView-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="wrap_content">-->
+<!--    </androidx.core.widget.NestedScrollView>-->
     <androidx.viewpager.widget.ViewPager
         android:id="@+id/viewpager"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior" />
+
+    <TextView
+        android:text="tesst"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"></TextView>
+    <FrameLayout
+        android:id="@+id/quickcontrols_container"
+    android:layout_width="match_parent"
+    android:layout_height="250dp"/>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

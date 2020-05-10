@@ -33,7 +33,7 @@ import java.util.Arrays;
 
 public class MainActivity extends AppCompatActivity implements SongFragment.SongClickCallback {
 
-    String TAG = "guantbb";
+    String TAG = "MainActivity";
 
     ServiceBinder binder = new ServiceBinder();
     IMusicPlaybackService mService;
@@ -75,12 +75,9 @@ public class MainActivity extends AppCompatActivity implements SongFragment.Song
 
     //start the Service and bind with  it
     private void bindService(){
-
         Intent intent = new Intent(this, MusicPlaybackService.class);
         startService(intent);
         bindService(intent,binder,0);
-
-
     }
 
     private void unbindService(){
@@ -154,10 +151,11 @@ public class MainActivity extends AppCompatActivity implements SongFragment.Song
         Log.d(TAG, "onSongClick: song id = "+ list[position]);
 
         try {
-            mService.open(list,position,0,0);
-            mService.play();
-
-            startActivity(new Intent(this,NowPlayingActivity.class));
+            if (mService != null ){
+                mService.open(list,position,0,0);
+                mService.play();
+                startActivity(new Intent(this,NowPlayingActivity.class));
+            }
 
         } catch (RemoteException e) {
             e.printStackTrace();

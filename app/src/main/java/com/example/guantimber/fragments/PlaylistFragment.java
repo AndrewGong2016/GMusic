@@ -1,7 +1,11 @@
 package com.example.guantimber.fragments;
 
 import android.app.AlertDialog;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -31,9 +35,12 @@ public class PlaylistFragment extends Fragment {
     private PlaylistAdapter playlistAdapter;
 
     private static String TAG = "PlaylistFragment";
+    StorageStateChangeReceiver mStorageStateReceiver;
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        Log.d(TAG, "onCreateView: ");
         View rootView = inflater.inflate(R.layout.playlists_fragment,container,false);
         mRecycleView = rootView.findViewById(R.id.recycler_view);
         mRecycleView.setLayoutManager(new LinearLayoutManager(getActivity()));
@@ -47,12 +54,20 @@ public class PlaylistFragment extends Fragment {
             }
         });
 
+        mStorageStateReceiver = new StorageStateChangeReceiver(getContext());
+        mStorageStateReceiver.register();
 
         new LoaderPlaylist().execute("");
 
         return rootView;
     }
 
+
+    @Override
+    public void onDestroyView() {
+        mStorageStateReceiver.unregister();
+        super.onDestroyView();
+    }
 
     class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.ViewHolder>{
 
@@ -108,10 +123,13 @@ public class PlaylistFragment extends Fragment {
 
         @Override
         protected String doInBackground(String... strings) {
-
             ArrayList<PlaylistData> playlistData = PlaylistLoader.getAllPlaylist(getContext());
-
             playlistAdapter = new PlaylistAdapter(playlistData);
+
+            PlaylistLoader.getPlaylist(getContext());
+            PlaylistLoader.addTrack2Playlist(getContext(),12,11);
+            PlaylistLoader.deleteTrackfromPlaylist(getContext(),12,12);
+
             return null;
         }
 
@@ -124,4 +142,34 @@ public class PlaylistFragment extends Fragment {
     }
 
 
+    class StorageStateChangeReceiver extends BroadcastReceiver{
+
+        private Context mContext;
+        StorageStateChangeReceiver(Context context){
+            mContext = context;
+        }
+        @Override
+        public void onReceive(final Context context, Intent intent) {
+            Log.d(TAG, "onReceive: action = "+ intent.getAction());
+//            Log.d(TAG, "onReceive: data = " + intent.getData().toString());
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    PlaylistLoader.onStorageStateChanged(context);
+                }
+            }){}.start();
+        }
+
+        public void register(){
+            IntentFilter filter = new IntentFilter();
+            filter.addAction(Intent.ACTION_MEDIA_EJECT);
+            filter.addAction(Intent.ACTION_MEDIA_MOUNTED);
+            filter.addAction(Intent.ACTION_MEDIA_REMOVED);
+            filter.addAction("android.intent.action.guan");
+            mContext.registerReceiver(this,filter);
+        }
+        public void unregister(){
+            mContext.unregisterReceiver(this);
+        }
+    }
 }

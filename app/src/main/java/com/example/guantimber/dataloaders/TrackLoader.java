@@ -3,6 +3,7 @@ package com.example.guantimber.dataloaders;
 import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Build;
 import android.provider.MediaStore;
 import android.util.Log;
 
@@ -26,7 +27,7 @@ public class TrackLoader {
             MediaStore.Audio.AudioColumns.ARTIST_ID,    // 5 : artist id in media store
             MediaStore.Audio.AudioColumns.ALBUM_ID,     // 6 : album of a track
             MediaStore.Audio.AudioColumns.ALBUM,        // 7 : album name
-            MediaStore.Audio.AudioColumns.MIME_TYPE
+            MediaStore.Audio.AudioColumns.MIME_TYPE,
     };
     public static String IS_MUSIC = MediaStore.Audio.AudioColumns.IS_MUSIC;
 
@@ -42,15 +43,15 @@ public class TrackLoader {
                 String artist = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.AudioColumns.ARTIST));
                 Long artist_id = cursor.getLong(cursor.getColumnIndex(MediaStore.Audio.AudioColumns.ARTIST_ID));
                 Long album_id = cursor.getLong(cursor.getColumnIndex(MediaStore.Audio.AudioColumns.ALBUM_ID));
-                String album = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.ALBUM));
-
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    String volume_name = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.VOLUME_NAME));
+                }
                 song.setId(id);
                 song.setData(data);
                 song.setTitle(title);
                 song.setArtist(artist);
                 song.setArtist_id(artist_id);
                 song.setAlbum_id(album_id);
-                song.setAlbum(album);
                 songTracks.add(song);
             }while (cursor.moveToNext());
 
@@ -67,11 +68,30 @@ public class TrackLoader {
     }
 
     private static Cursor getAllTracks(Context context){
-        StringBuilder builder = new StringBuilder();
-        builder.append("title !=''");
-        builder.append(" AND "+IS_MUSIC+"=1");
-        Cursor cursor = context.getContentResolver().query(MEDIA_URI,COLUMNS,builder.toString(),null,null);
+//        StringBuilder builder = new StringBuilder();
+//        builder.append("title !=''");
+//        builder.append(" AND "+IS_MUSIC+"=1");
+//        Cursor cursor = context.getContentResolver().query(MEDIA_URI,COLUMNS,builder.toString(),null,null);
+        Cursor cursor = context.getContentResolver().query(
+                MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+                getTrackQueryCols(),
+                "title != ''" + " AND is_music=1",
+                (String[]) null,
+                "title_key");
         return cursor;
+    }
+
+    public static String[] getTrackQueryCols() {
+        String[] strArr = new String[8];
+        strArr[0] = "_data";
+        strArr[1] = "_id";
+        strArr[2] = "title";
+        strArr[3] = "artist";
+        strArr[4] = "artist_id";
+        strArr[5] = "album_id";
+        strArr[6] = "mime_type";
+        strArr[7] = "date_added";
+        return strArr;
     }
 
     public static Uri getAlbumArtUri(long id){
