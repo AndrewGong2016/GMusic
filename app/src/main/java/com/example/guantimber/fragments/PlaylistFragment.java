@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.IntentSender;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -20,12 +21,14 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.guantimber.R;
 import com.example.guantimber.data.PlaylistData;
 import com.example.guantimber.dataloaders.PlaylistLoader;
+import com.example.guantimber.datastore.PlaylistStore;
 
 import java.util.ArrayList;
 
@@ -36,6 +39,7 @@ public class PlaylistFragment extends Fragment {
 
     private static String TAG = "PlaylistFragment";
     StorageStateChangeReceiver mStorageStateReceiver;
+    PlaylistChangeReceiver mPlaylistRecevier;
 
     @Nullable
     @Override
@@ -57,15 +61,23 @@ public class PlaylistFragment extends Fragment {
         mStorageStateReceiver = new StorageStateChangeReceiver(getContext());
         mStorageStateReceiver.register();
 
+        mPlaylistRecevier = new PlaylistChangeReceiver(getContext());
+        mPlaylistRecevier.register();
+
         new LoaderPlaylist().execute("");
+
+        PlaylistLoader.addTrackIntoPlaylist(getContext(),12,11);
 
         return rootView;
     }
 
 
+
+
     @Override
     public void onDestroyView() {
         mStorageStateReceiver.unregister();
+        mPlaylistRecevier.unregister();
         super.onDestroyView();
     }
 
@@ -126,9 +138,9 @@ public class PlaylistFragment extends Fragment {
             ArrayList<PlaylistData> playlistData = PlaylistLoader.getAllPlaylist(getContext());
             playlistAdapter = new PlaylistAdapter(playlistData);
 
-            PlaylistLoader.getPlaylist(getContext());
-            PlaylistLoader.addTrack2Playlist(getContext(),12,11);
-            PlaylistLoader.deleteTrackfromPlaylist(getContext(),12,12);
+            PlaylistLoader.getPlaylists(getContext());
+//            PlaylistLoader.addTrack2Playlist(getContext(),12,11);
+//            PlaylistLoader.deleteTrackfromPlaylist(getContext(),12,12);
 
             return null;
         }
@@ -170,6 +182,28 @@ public class PlaylistFragment extends Fragment {
         }
         public void unregister(){
             mContext.unregisterReceiver(this);
+        }
+    }
+
+    class PlaylistChangeReceiver extends BroadcastReceiver{
+        private Context mContext;
+        PlaylistChangeReceiver(Context context){
+            mContext = context;
+        }
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.d(TAG, "onReceive: action = " + intent.getAction());
+            new LoaderPlaylist().execute("");
+        }
+
+        public void register(){
+            LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(mContext);
+            IntentFilter filter = new IntentFilter();
+            filter.addAction(PlaylistStore.PLAYLISTCHANGE_INTENT);
+            localBroadcastManager.registerReceiver(this,filter);
+        }
+        public void unregister(){
+            LocalBroadcastManager.getInstance(mContext).unregisterReceiver(this);
         }
     }
 }

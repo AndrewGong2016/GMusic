@@ -2,6 +2,7 @@ package com.example.guantimber.fragments;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;

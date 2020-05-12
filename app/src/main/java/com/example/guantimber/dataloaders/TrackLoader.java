@@ -19,22 +19,24 @@ public class TrackLoader {
 
     public static String TAG = "TrackLoader";
 
-    public static String[] COLUMNS = new String[]{
-            MediaStore.Audio.AudioColumns._ID,          // 1 : id in media store
-            MediaStore.Audio.AudioColumns.DATA,         // 2 : path in media store
-            MediaStore.Audio.AudioColumns.TITLE,        // 3 : title in media store
-            MediaStore.Audio.AudioColumns.ARTIST,       // 4 : artist of a track
-            MediaStore.Audio.AudioColumns.ARTIST_ID,    // 5 : artist id in media store
-            MediaStore.Audio.AudioColumns.ALBUM_ID,     // 6 : album of a track
-            MediaStore.Audio.AudioColumns.ALBUM,        // 7 : album name
-            MediaStore.Audio.AudioColumns.MIME_TYPE,
-    };
     public static String IS_MUSIC = MediaStore.Audio.AudioColumns.IS_MUSIC;
+
+
+    static {
+
+        ArrayList<SongTrack> songTracks = new ArrayList<SongTrack>();
+        long[] audios = null;
+        for(long id : audios){
+
+        }
+
+    }
 
     public static ArrayList<SongTrack> getAllSongs(Context context){
         Cursor cursor = getAllTracks(context);
         if (cursor!= null && cursor.moveToNext()){
             ArrayList<SongTrack> songTracks = new ArrayList<SongTrack>();
+
             do {
                 SongTrack song = new SongTrack();
                 Long id = cursor.getLong(cursor.getColumnIndex(MediaStore.Audio.AudioColumns._ID));
@@ -82,7 +84,13 @@ public class TrackLoader {
     }
 
     public static String[] getTrackQueryCols() {
-        String[] strArr = new String[8];
+        String[] strArr;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            strArr = new String[9];
+        } else {
+            strArr = new String[8];
+        }
+
         strArr[0] = "_data";
         strArr[1] = "_id";
         strArr[2] = "title";
@@ -91,6 +99,11 @@ public class TrackLoader {
         strArr[5] = "album_id";
         strArr[6] = "mime_type";
         strArr[7] = "date_added";
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            strArr[8] = "volume_name";
+        }
+
         return strArr;
     }
 
@@ -104,7 +117,7 @@ public class TrackLoader {
         builder.append("title !=''");
         builder.append(" AND "+IS_MUSIC+"=1");
         builder.append(" AND "+MediaStore.Audio.AudioColumns._ID+"="+id);
-        Cursor cursor = context.getContentResolver().query(MEDIA_URI,COLUMNS,builder.toString(),null,null);
+        Cursor cursor = context.getContentResolver().query(MEDIA_URI,getTrackQueryCols(),builder.toString(),null,null);
 
         if (cursor!= null && cursor.moveToNext()){
             SongTrack song = new SongTrack();

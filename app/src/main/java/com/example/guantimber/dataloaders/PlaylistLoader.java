@@ -2,6 +2,7 @@ package com.example.guantimber.dataloaders;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
@@ -11,8 +12,11 @@ import android.provider.BaseColumns;
 import android.provider.MediaStore;
 import android.util.Log;
 
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+
 import com.example.guantimber.data.PlaylistData;
-import com.example.guantimber.database.MusicPlaylistStore;
+import com.example.guantimber.datastore.PlaylistDataBaseHelper;
+import com.example.guantimber.service.MusicPlaybackService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,6 +36,10 @@ public class PlaylistLoader {
         Cursor cursor = context.getContentResolver().query(MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI,
                 COLUMNS,
                 null,null,MediaStore.Audio.Playlists.DEFAULT_SORT_ORDER);
+        String packageName = MediaStore.Audio.PlaylistsColumns.OWNER_PACKAGE_NAME;
+
+
+
         if (cursor != null && cursor.moveToFirst()) {
             do {
                 final long id = cursor.getLong(0);
@@ -42,7 +50,7 @@ public class PlaylistLoader {
                 playlist.setNumberOfSongs(songCount);
                 playlistSet.add(playlist);
             } while (cursor.moveToNext());
-        }else {
+        } else {
             Log.d(TAG, "getAllPlaylist: no playlist for " + context.getPackageName());
         }
         if (cursor != null) cursor.close();
@@ -68,17 +76,17 @@ public class PlaylistLoader {
 
 
     // get audio_playlist map, this will Retrive all audio-playlist ids' maps stored
-    public static void getPlaylist(Context context){
-        MusicPlaylistStore dataBaseHelper = new MusicPlaylistStore(context,MusicPlaylistStore.DATABASE_NAME,1);
+    public static void getPlaylists(Context context){
+        PlaylistDataBaseHelper dataBaseHelper = new PlaylistDataBaseHelper(context,PlaylistDataBaseHelper.DATABASE_NAME,1);
         SQLiteDatabase sqLiteDatabase = dataBaseHelper.getReadableDatabase();
 
         String[] columes = new String[]{
-                MusicPlaylistStore.COLUMES.ID,
-                MusicPlaylistStore.COLUMES.AUDIO_ID,
-                MusicPlaylistStore.COLUMES.PLAYLIST_ID
+                PlaylistDataBaseHelper.COLUMES.ID,
+                PlaylistDataBaseHelper.COLUMES.AUDIO_ID,
+                PlaylistDataBaseHelper.COLUMES.PLAYLIST_ID
         };
 
-        Cursor cursor = sqLiteDatabase.query(MusicPlaylistStore.TABLE_NAME,columes,
+        Cursor cursor = sqLiteDatabase.query(PlaylistDataBaseHelper.TABLE_NAME,columes,
                 null,null,null,null,null);
         if (cursor == null) return;
         while (cursor.moveToNext()){
@@ -97,14 +105,17 @@ public class PlaylistLoader {
      * @param playListId
      * @return  the inserted row id in database;
      */
-    public static long addTrack2Playlist(Context context, long audioId, long playListId){
-        MusicPlaylistStore dataBaseHelper = new MusicPlaylistStore(context,MusicPlaylistStore.DATABASE_NAME,1);
+    public static long addTrackIntoPlaylist(Context context, long audioId, long playListId){
+        PlaylistDataBaseHelper dataBaseHelper = new PlaylistDataBaseHelper(context,PlaylistDataBaseHelper.DATABASE_NAME,1);
         SQLiteDatabase sqLiteDatabase = dataBaseHelper.getReadableDatabase();
         ContentValues values = new ContentValues();
-        values.put(MusicPlaylistStore.COLUMES.AUDIO_ID,audioId);
-        values.put(MusicPlaylistStore.COLUMES.PLAYLIST_ID,playListId);
-        long rowId = sqLiteDatabase.insert(MusicPlaylistStore.TABLE_NAME,null,values);
-        if ( rowId > 0 ){
+        values.put(PlaylistDataBaseHelper.COLUMES.AUDIO_ID,audioId);
+        values.put(PlaylistDataBaseHelper.COLUMES.PLAYLIST_ID,playListId);
+        long rowId = sqLiteDatabase.insert(PlaylistDataBaseHelper.TABLE_NAME,null,values);
+        if ( rowId > 0 ) {
+            //notify playlist change using broadcast
+            LocalBroadcastManager broadcastManager = LocalBroadcastManager.getInstance(context);
+            broadcastManager.sendBroadcast(new Intent(PlaylistDataBaseHelper.PLAYLISTCHANGE_INTENT));
             Log.d(TAG, "addTrack2Playlist: insert success!!");
         }
         sqLiteDatabase.close();
@@ -123,22 +134,22 @@ public class PlaylistLoader {
 
 
     /**
-     *This will DELETE all audio-playlist map in the database ,think it twice before calling this.
+     *This will DELETE all audio-playlist map with the specific ids in the database ,think it twice before calling this.
      */
-    public static void deleteTrackfromPlaylist(Context context,long audioId, long playlistId){
-        MusicPlaylistStore dataBaseHelper = new MusicPlaylistStore(context,MusicPlaylistStore.DATABASE_NAME,1);
+    public static void removeTrackfromPlaylist(Context context,long audioId, long playlistId){
+        PlaylistDataBaseHelper dataBaseHelper = new PlaylistDataBaseHelper(context,PlaylistDataBaseHelper.DATABASE_NAME,1);
         SQLiteDatabase sqLiteDatabase = dataBaseHelper.getReadableDatabase();
 
         //1 query if the map existed
         String[] columes = new String[]{
-                MusicPlaylistStore.COLUMES.ID,
-                MusicPlaylistStore.COLUMES.AUDIO_ID,
-                MusicPlaylistStore.COLUMES.PLAYLIST_ID
+                PlaylistDataBaseHelper.COLUMES.ID,
+                PlaylistDataBaseHelper.COLUMES.AUDIO_ID,
+                PlaylistDataBaseHelper.COLUMES.PLAYLIST_ID
         };
         StringBuilder builder = new StringBuilder();
-        builder.append(MusicPlaylistStore.COLUMES.AUDIO_ID + "="+ audioId);
-        builder.append(" AND " + MusicPlaylistStore.COLUMES.PLAYLIST_ID + "=" + playlistId);
-        Cursor cursor = sqLiteDatabase.query(MusicPlaylistStore.TABLE_NAME,columes,builder.toString(),
+        builder.append(PlaylistDataBaseHelper.COLUMES.AUDIO_ID + "="+ audioId);
+        builder.append(" AND " + PlaylistDataBaseHelper.COLUMES.PLAYLIST_ID + "=" + playlistId);
+        Cursor cursor = sqLiteDatabase.query(PlaylistDataBaseHelper.TABLE_NAME,columes,builder.toString(),
                 null,null,null,null);
         if (cursor != null && cursor.moveToFirst()){
             Log.d(TAG, "deleteTrackfromPlaylist: get count:"+ cursor.getCount());
@@ -147,7 +158,6 @@ public class PlaylistLoader {
                 long audio_id = cursor.getLong(cursor.getColumnIndexOrThrow(columes[1]));
                 long playlist_id = cursor.getLong(cursor.getColumnIndexOrThrow(columes[1]));
                 Log.d(TAG, "deleteTrackfromPlaylist: id =" + id);
-
             }while (cursor.moveToNext());
         } else {
             Log.d(TAG, "deleteTrackfromPlaylist: Not Found audio id : "+ audioId + " in playlist with id = " +playlistId);
@@ -155,8 +165,8 @@ public class PlaylistLoader {
         if(cursor != null) cursor.close();
 
         //2 delete the audio-playlist map
-        int deletedRows = sqLiteDatabase.delete(MusicPlaylistStore.TABLE_NAME,builder.toString(),null);
-        Log.d(TAG, "deleteTrackfromPlaylist: deleted rows number is "+deletedRows);
+        int deletedRows = sqLiteDatabase.delete(PlaylistDataBaseHelper.TABLE_NAME,builder.toString(),null);
+        Log.d(TAG, "deleteTrackfromPlaylist: deleted "+deletedRows +" rows.");
 
         sqLiteDatabase.close();
     }
